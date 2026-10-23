@@ -1,0 +1,30 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import BlogCard from '../../components/BlogCard.astro';
+
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog');	//从content.config定义的 blog collection 里，把所有文章读取出来。
+
+posts.sort(
+    (a, b) =>
+        b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<Layout>
+
+    <h1>Blog</h1>
+
+    {
+        posts.map((post) => (
+            <BlogCard
+                title={post.data.title}
+                description={post.data.description}
+                pubDate={post.data.pubDate}
+                id={post.id}
+            />
+        ))
+    }
+
+</Layout>

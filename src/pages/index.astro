@@ -1,11 +1,215 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import { projects } from '../data/projects';
+
+import BlogCard from '../components/BlogCard.astro';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog');
+
+const recentPosts = posts
+    .sort(
+        (a, b) =>
+            b.data.pubDate.valueOf() -
+            a.data.pubDate.valueOf()
+    )
+    .slice(0, 2);
 ---
 
 <Layout>
-	<Welcome />
+	<section class="hero">
+		<p class="eyebrow">
+			Computer Science Student
+		</p>
+
+		<h1>
+			Hi, I'm Tobby Zhang.
+		</h1>
+
+		<p class="intro">
+			I'm interested in artificial intelligence,
+			algorithms and optimization.
+			I use this website  to share my learning notes,
+			projects and technical explorations.
+		</p>
+
+		<div class="hero-actions">
+			<a class="primary-button" href="/blog">
+				Read Blog
+			</a>
+
+			<a class="secondary-button" href="/projects">
+				View Projects
+			</a>
+
+		</div>
+	
+	</section>
+
+	<section class="featured-projects">
+
+		<div class="section-header">
+			<h2>Featured Projects</h2>
+
+			<a href="/projects">
+				View all →
+			</a>
+		</div>
+
+		<div class="project-grid">
+			{
+				projects.slice(0,2).map((project) => (
+					<ProjectCard
+						title={project.title}
+						description={project.description}
+					/>
+				))
+			}	
+		</div>
+	</section>
+
+
+	<section class="recent-post">
+
+		<div class="section-header">
+			<h2>Recent Posts</h2>
+
+			<a href="/blog">
+				View all →
+			</a>
+		</div>
+
+		{
+			recentPosts.map((post) =>(
+				<BlogCard
+					title={post.data.title}
+					description={post.data.description}
+					pubDate={post.data.pubDate}
+					id={post.id}
+				/>
+			))
+		}
+	</section>
 </Layout>
+
+
+<style>
+	.hero{
+		paddin: 80px 0;
+	}
+	
+	.eyebrow{
+		color: var(--text-light);
+		font-weight: 600;
+		margin-bottom: 12px;
+	}
+
+	h1{
+		font-size:clamp(42px,7vw,72px);
+		margin:0 0 24px;
+	}
+
+	.intro{
+		max-width: 650px;
+
+		font-size: 20px;
+		color:var(--text-light);
+
+		margin-bottom: 32px;
+	}
+
+	.hero-actions{
+		display: flex;
+		gap: 16px;
+	}
+
+	.primary-button,
+	.secondary-button{
+		padding: 10px 18px;
+
+		border-radius:8px;
+
+		text-decoration: none;
+
+		font-weight:600;
+
+		transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+	}
+
+	.primary-button {
+        color: white;
+        background: #222;
+		border: 1px solid #222;
+    }
+
+    .secondary-button {
+		color: var(--text);
+    	background: rgb(227, 189, 207);
+        border: 1px solid var(--border);
+    }
+
+	.primary-button:hover,
+	.secondary-button:hover {
+		transform: translateY(-2px);
+	}
+
+
+
+	.featured-projects {
+    	padding: 64px 0;
+	}
+
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		margin-bottom: 24px;
+	}
+
+	.section-header h2 {
+		margin: 0;
+		font-size: 32px;
+	}
+
+	.section-header a {
+		color: var(--text-light);
+		text-decoration: none;
+	}
+
+	.section-header a:hover {
+		color: var(--text);
+	}
+
+	.project-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 20px;
+	}
+
+
+
+	.recent-posts {
+		padding: 64px 0;
+	}
+
+	@media (max-width: 700px) {
+		.project-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.hero {
+			padding: 48px 0;
+		}
+
+		.hero-actions {
+			flex-wrap: wrap;
+		}
+
+	}
+</style>

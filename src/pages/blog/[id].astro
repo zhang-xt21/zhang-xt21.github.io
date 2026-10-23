@@ -1,0 +1,417 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render }from 'astro:content';
+
+export async function getStaticPaths() {
+    const posts = await getCollection('blog');   //去 blog 这个 Content Collection 里，把所有文章读取出来。
+
+    return posts.map((post) => ({   //map()：对每篇文章做同一件事，类似于遍历
+        params: {
+            id: post.id,    //决定 URL
+        },
+        props: {    //把这个页面需要的数据传进去
+            post,
+        },
+    }));
+}
+//告诉Astro有哪些文章URL需要提前生成
+
+const { post } = Astro.props;
+
+const { Content, headings } = await render(post);     //把 Markdown 文章内容转成可以渲染的内容。
+
+const toc = headings.filter(
+    (heading) => heading.depth === 2 || heading.depth === 3
+);  //保留二级和三级标题进行制作目录
+---
+
+<Layout>
+    <div class="post-layout">
+
+        {
+            toc.length > 0 && (
+                <aside class="toc-sidebar">
+
+                    <a class="back-link" href="/blog">
+                        ← Back to Blog
+                    </a>
+                    
+                    <p class="toc-title">
+                        On this page
+                    </p>
+
+                    <nav class="toc">
+                        <ul>
+                            {
+                                toc.map((heading) => (
+                                    <li
+                                        class={
+                                            heading.depth === 3
+                                                ? "toc-level-3"
+                                                : ""
+                                        }
+                                    >
+                                        <a
+                                            href={`#${heading.slug}`}
+                                            data-heading-id={heading.slug}
+                                        >
+                                            {heading.text}
+                                        </a>
+                                    </li>
+                                ))
+                            }
+                        </ul>
+                    </nav>
+                </aside>
+            )
+        }
+
+        <article class="post">
+
+            <header class="post-header">
+
+
+                <h1>{post.data.title}</h1>
+
+                <p class="description">
+                    {post.data.description}
+                </p>
+
+                <div class="post-meta">
+                    <time>
+                        {post.data.pubDate.toLocaleDateString()}
+                    </time>
+
+                    <div class="tags">
+                        {
+                            post.data.tags.map((tag) => (
+                                <span class="tag">
+                                    {tag}
+                                </span>
+                            ))
+                        }
+                    </div>
+                </div>
+
+            </header>
+
+            <div class="prose">
+                <Content />
+            </div>
+
+        </article>
+
+    </div>
+</Layout>
+
+
+<style is:global>
+
+    .post {
+        max-width: 830px;
+        min-width: 0;
+    }
+
+    .post-layout {
+        display: grid;
+
+
+        grid-template-areas:
+            "toc article";
+
+        grid-template-columns:
+            250px
+            minmax(0, 830px);
+            
+
+        gap: 64px;
+
+        align-items: start;
+    }
+
+
+    .post-header {
+        margin-bottom: 56px;
+    }
+
+    .back-link {
+        display: inline-block;
+
+        margin-bottom: 32px;
+
+        color: var(--text-light);
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        color: var(--text);
+    }
+
+    .post-header h1 {
+        margin: 0 0 16px;
+
+        font-size: clamp(38px, 6vw, 56px);
+        line-height: 1.15;
+    }
+
+    .description {
+        margin-bottom: 20px;
+
+        color: var(--text-light);
+        font-size: 18px;
+    }
+
+    .post-meta {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        color: var(--text-light);
+        font-size: 14px;
+    }
+
+    .tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .tag {
+        padding: 3px 10px;
+
+        border: 1px solid var(--border);
+        border-radius: 999px;
+
+        font-size: 13px;
+    }
+
+    /* 目录 */
+
+    /* 将目录固定 */
+    .toc-sidebar {
+        position: sticky;
+
+        top: 40px;
+
+        padding-right: 20px;
+
+        border-right: 1px solid var(--border);
+    }
+
+
+    .toc {
+        margin-bottom: 48px;
+        padding: 20px 24px;
+
+        border: 1px solid var(--border);
+        border-radius: 10px;
+
+        background: #fafafa;
+    }
+
+    .toc-title {
+        margin: 0 0 12px;
+        
+        font-size: 14px;
+        font-weight: 700;
+
+        color: var(--text);
+    }
+
+    .toc ul {
+        margin: 0;
+        padding: 0;
+
+        list-style: none;
+    }
+
+    .toc li {
+        margin: 8px 0;
+    }
+
+    .toc a {
+        color: var(--text-light);
+        text-decoration: none;
+        font-size: 14px;
+
+        transition:
+            color 0.2s ease,
+            font-weight 0.2s ease;
+    }
+
+    .toc a:hover {
+        color: var(--text);
+    }
+
+    .toc a.active {
+        color: var(--text);
+        font-weight: 700;
+    }
+
+
+    
+    /* Markdown 正文 */
+
+    .prose {
+        font-size: 17px;
+        line-height: 1.8;
+    }
+
+    .prose h2 {
+        margin-top: 48px;
+        margin-bottom: 16px;
+
+        font-size: 28px;
+    }
+
+    .prose h3 {
+        margin-top: 36px;
+        margin-bottom: 12px;
+
+        font-size: 22px;
+    }
+
+    .prose p {
+        margin: 18px 0;
+    }
+
+    .prose ul,
+    .prose ol {
+        padding-left: 28px;
+    }
+
+    .prose li {
+        margin: 8px 0;
+    }
+
+    .prose blockquote {
+        margin: 28px 0;
+        padding-left: 20px;
+
+        border-left: 4px solid var(--border);
+
+        color: var(--text-light);
+    }
+
+    .prose img {
+        max-width: 100%;
+        height: auto;
+
+        border-radius: 10px;
+    }
+
+    .prose pre {
+        margin: 28px 0;
+
+        padding: 20px;
+
+        border-radius: 10px;
+
+        overflow-x: auto;
+    }
+
+    .prose code:not(pre code) {
+        padding: 2px 6px;
+
+        background: #f3f3f3;
+
+        border-radius: 4px;
+
+        font-size: 0.9em;
+    }
+
+    .prose hr {
+        margin: 48px 0;
+
+        border: 0;
+        border-top: 1px solid var(--border);
+    }
+
+
+
+
+    @media (max-width: 900px) {
+        .post-layout {
+            width: 100%;
+
+            margin-left: 0;
+            transform: none;
+
+            grid-template-columns: 1fr;
+
+            grid-template-areas:
+                "toc"
+                "article";
+        }
+
+        .toc-sidebar {
+            position: static;
+
+            padding-right: 0;
+            padding-bottom: 24px;
+
+            border-right: none;
+            border-bottom: 1px solid var(--border);
+        }
+    }
+</style>
+
+
+<script>
+    const links = Array.from(
+        document.querySelectorAll<HTMLAnchorElement>('.toc a')
+    );
+
+    const items = links
+        .map((link) => {
+            const id = link.dataset.headingId;
+
+            if (!id) return null;
+
+            const heading = document.getElementById(id);
+
+            if (!heading) return null;
+
+            return {
+                link,
+                heading,
+            };
+        })
+        .filter(
+            (
+                item
+            ): item is {
+                link: HTMLAnchorElement;
+                heading: HTMLElement;
+            } => item !== null
+        );
+
+    function updateActiveHeading() {
+        let current = items[0];
+
+        for (const item of items) {
+            if (
+                item.heading.getBoundingClientRect().top
+                <= 180
+            ) {
+                current = item;
+            } else {
+                break;
+            }
+        }
+
+        for (const item of items) {
+            item.link.classList.remove('active');
+        }
+
+        current?.link.classList.add('active');
+    }
+
+    window.addEventListener(
+        'scroll',
+        updateActiveHeading,
+        { passive: true }
+    );
+
+    updateActiveHeading();
+</script>

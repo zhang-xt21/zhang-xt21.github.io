@@ -1,0 +1,61 @@
+---
+const siteName="My Blog";
+---
+
+<header class="site-header">
+    <div class="header-inner">
+
+        <a class="site-name" href="/">
+            {siteName}
+        </a>
+
+        <nav>
+            <a href="/">Home</a>
+            <a href="/blog">Blog</a>
+            <a href="/projects">Projects</a>
+            <a href="/about">About</a>
+        </nav>
+
+    </div>
+</header>
+
+<style>
+    .site-header {
+        border-bottom: 1px solid var(--border);
+    }
+
+
+    .header-inner{
+        max-width: var(--content-width);
+        margin: 0 auto;
+        padding: 20px 24px;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .site-name{
+        color: var(--text);
+        font-size: 20px;
+        font-weight:700;
+        text-decoration: none;
+    }
+
+    nav{
+        display: flex;
+        gap: 24px;
+        
+    }
+
+    nav  a{
+        color: var(--text-light);
+        text-decoration: none;
+
+        transition: color 0.2s ease;
+    }
+
+    nav a:hover {
+        color: var(--text);
+    }
+</style>

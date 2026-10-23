@@ -1,0 +1,59 @@
+---
+interface Props{
+    title: string;
+    description: string;
+    pubDate: Date;
+    id: string;
+}
+
+const{
+    title,
+    description,
+    pubDate,
+    id
+}=Astro.props;
+---
+
+<article class="blog card">
+
+    <h2>
+        <a href={`/blog/${id}`}>    
+            {title}
+        </a>
+    </h2>
+
+    <p>{description}</p>
+
+    <time>
+        {pubDate.toLocaleDateString()}
+    </time>
+</article>
+
+<style>
+    .blog-card {
+        padding: 20px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    h2 {
+        margin-bottom: 8px;
+    }
+
+    h2 a {
+        color: #222;
+        text-decoration: none;
+    }
+
+    h2 a:hover {
+        text-decoration: underline;
+    }
+
+    p {
+        color: #555;
+    }
+
+    time {
+        color: #888;
+        font-size: 14px;
+    }
+</style>
